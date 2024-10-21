@@ -4,12 +4,6 @@ import tabulate as tb
 import math
 
 
-class point:
-    def __init__(self, x, y):
-        self.x = x
-        self = y
-
-
 class function:
     def __init__(self, f: Callable[[float], float], f_str):
         self.f_str = f_str
@@ -28,7 +22,7 @@ class diff:
         self.step = step
         self.num_vals = num_vals
         self.nodes = [self.start + self.step * i for i in range(self.num_vals)]
-        self.f_vals: List[point] = [self.f(t) for t in self.nodes]
+        self.f_vals = [self.f(t) for t in self.nodes]
 
     def print_f(self):
         table = (['x'] + self.nodes, ['y'] + self.f_vals)
@@ -113,14 +107,15 @@ class diff:
 
         line_d2f = [[cur_x, cur_x, J1_d2f,
                     err_J1_d2f,J2_d2f, err_J2_d2f, J_d2f,
-                    abs(cur_x - self.f.d2f(cur_x))]]
+                    abs(J_d2f - self.f.d2f(cur_x))]]
 
-        print(f"Уточнённые значения второй производной в точке x = {cur_x}:")
+        print("\n"f"Уточнённые значения второй производной в точке x = {cur_x}:")
         print(tb.tabulate(line_d2f, headers=labels, numalign="center", floatfmt=".3f", tablefmt="fancy_grid"))
 
     def draw(self):
         fig, (ax1, ax2) = plt.subplots(2)
         fig.set_size_inches(w=8, h=7)
+        
         fig.suptitle('Точные и вычисленные значения соответственно')
         self.draw_exact(ax1)
         self.draw_calc(ax2)
@@ -155,7 +150,7 @@ class diff:
         plot.axhline(0, color='gray', linewidth=1.5)
         plot.axvline(0, color='gray', linewidth=1.5)
         plot.legend()
-        plt.show()
+        plt.show(block=False)
 
         
 def main():
@@ -168,26 +163,44 @@ def main():
     f2.d2f = function(lambda x: 20.25 * math.exp(4.5 * x), "20.25 * e^4.5x")
 
     print("Программа для нахождения производных таблично-заданной функции по формулам численного дифференцирования. Вариант №2")
-    print(f"\n1: {f1.f_str}\n2: {f2.f_str}\n")
     
-    choice = int(input("Выберите функцию для поиска производной: "))
-    num_vals = int(input("Введите m - количество значений в таблице (m >= 4): "))
-    start = float(input("Введите начальное значение x: "))
-    step = float(input("Введите шаг h: "))
-    funcs = [f1, f2]
+    choice = 0
+    while True:
+        print(f"\n1: {f1.f_str}\n2: {f2.f_str}\n")
+        func_num = int(input("Выберите функцию для поиска производной: "))
+        
+        while True:
+            num_vals = int(input("Введите m - количество значений в таблице (m >= 5): "))
+            start = float(input("Введите начальное значение x: "))
+            step = float(input("Введите шаг h: "))
+            funcs = [f1, f2]
 
-    prog = diff(funcs[choice - 1], start, step, num_vals)
-    print("\n"f"Таблица значений функции {funcs[choice - 1].f_str}:\n")
-    prog.print_f()
-    print("\n"f"Поиск производных функции {funcs[choice - 1].f_str}:\n")
-    prog.print_res_table()
-    
-    node_num = int(input("Выберите номер узла, для уточнения производных: "))
-    prog.runge(node_num - 1)
-    
-    prog.draw()
-    
-    
+            prog = diff(funcs[func_num - 1], start, step, num_vals)
+            print("\n"f"Таблица значений функции {funcs[func_num - 1].f_str}:\n")
+            prog.print_f()
+            print("\n"f"Поиск производных функции {funcs[func_num - 1].f_str}:\n")
+            prog.print_res_table()
+            plt.close()
+            prog.draw()
+            
+            if choice == 3:
+                node_num = int(input("\n""Выберите номер узла, для уточнения производных: "))
+                prog.runge(node_num - 1)
+                
+            
+            print("\n""Опции на выбор:\n"
+                "1 - Выбрать другие функцию и параметры таблицы\n"
+                "2 - Изменить параметры таблицы\n"
+                "3 - Уточнить производную по Рунге-Ромберту\n"
+                "4 - Выйти\n")
+            choice = int(input("Выберите опцию: "))
 
+            if choice != 2:
+                break
+
+        if choice == 4:
+            break
+    
+# params usage: cat params | python3 main.py
 if __name__ == '__main__':
     main()

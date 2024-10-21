@@ -27,7 +27,7 @@ class interpol:
     def print_table(self, points):
         vals = [self.f(t) for t in points]
         table = (['x'] + points, ['y'] + vals)
-        print(tb.tabulate(table, floatfmt=".2f"))
+        print(tb.tabulate(table, floatfmt=".2f", tablefmt="fancy_grid", numalign="center"))
 
     def draw(self):
         f_vals = [self.f(t) for t in self.nodes]
